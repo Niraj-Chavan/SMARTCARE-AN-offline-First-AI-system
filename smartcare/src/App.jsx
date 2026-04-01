@@ -1,16 +1,22 @@
 ﻿import { useEffect, useState } from 'react'
 import OfflineBanner from './components/OfflineBanner'
 import DebugPanel from './components/DebugPanel'
+import OnboardingScreen from './screens/OnboardingScreen'
 import SymptomInputScreen from './screens/SymptomInputScreen'
 import ResultsScreen from './screens/ResultsScreen'
 import HistoryScreen from './screens/HistoryScreen'
 import { useOnlineStatus } from './hooks/useOnlineStatus'
 import { seedKnowledgeBase } from './db/seed'
 
+const ONBOARDING_KEY = 'smartcare_onboarded'
+
 function App() {
   const isOnline = useOnlineStatus()
   const [screen, setScreen] = useState('symptoms')
   const [results, setResults] = useState(null)
+  const [hasOnboarded, setHasOnboarded] = useState(() => {
+    return localStorage.getItem(ONBOARDING_KEY) === 'true'
+  })
 
   useEffect(() => {
     if (!isOnline) return
@@ -25,6 +31,12 @@ function App() {
   }
 
   function handleCheckAgain() {
+    setScreen('symptoms')
+  }
+
+  function handleGetStarted() {
+    localStorage.setItem(ONBOARDING_KEY, 'true')
+    setHasOnboarded(true)
     setScreen('symptoms')
   }
 
@@ -68,15 +80,18 @@ function App() {
         </div>
       </nav>
 
-      {screen === 'symptoms' && <SymptomInputScreen onResults={handleResults} />}
-      {screen === 'results' && (
+      {!hasOnboarded && <OnboardingScreen onGetStarted={handleGetStarted} />}
+      {hasOnboarded && screen === 'symptoms' && (
+        <SymptomInputScreen onResults={handleResults} />
+      )}
+      {hasOnboarded && screen === 'results' && (
         <ResultsScreen
           results={results}
           onCheckAgain={handleCheckAgain}
           onSaved={() => setScreen('history')}
         />
       )}
-      {screen === 'history' && <HistoryScreen />}
+      {hasOnboarded && screen === 'history' && <HistoryScreen />}
     </div>
   )
 }

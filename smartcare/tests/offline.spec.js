@@ -1,8 +1,6 @@
 ﻿import { test, expect } from '@playwright/test'
 
-const APP_URL = process.env.PLAYWRIGHT_APP_URL || 'http://localhost:5173'
-
-test.use({ headless: false })
+const APP_URL = process.env.PLAYWRIGHT_APP_URL || 'http://localhost:4173'
 
 test.describe('Offline symptom check', () => {
   test('runs a full check offline without network failures', async ({ browser }) => {

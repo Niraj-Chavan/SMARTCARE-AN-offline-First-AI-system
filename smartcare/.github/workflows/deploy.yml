@@ -26,11 +26,13 @@ jobs:
       - name: Run unit tests
         run: npm run test -- --run
 
-      - name: Run e2e tests
-        run: npx playwright test
-
       - name: Build
         run: npm run build
+
+      - name: Run e2e tests
+        env:
+          PLAYWRIGHT_BASE_URL: http://localhost:4173
+        run: npm run e2e
 
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v25
