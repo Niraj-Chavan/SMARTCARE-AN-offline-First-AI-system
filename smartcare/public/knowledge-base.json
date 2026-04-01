@@ -1,0 +1,194 @@
+﻿[
+  {
+    "id": 1,
+    "name": "Common Cold",
+    "symptoms": ["runny nose", "sore throat", "sneezing", "cough", "mild fever"],
+    "riskLevel": "low",
+    "recommendations": [
+      "Rest and stay hydrated",
+      "Use saline nasal spray for congestion",
+      "Monitor symptoms for 48 hours"
+    ],
+    "version": 1
+  },
+  {
+    "id": 2,
+    "name": "Influenza",
+    "symptoms": ["fever", "chills", "body aches", "fatigue", "cough"],
+    "riskLevel": "medium",
+    "recommendations": [
+      "Rest and drink plenty of fluids",
+      "Consider over-the-counter fever reducers",
+      "Seek care if breathing becomes difficult"
+    ],
+    "version": 1
+  },
+  {
+    "id": 3,
+    "name": "COVID-19",
+    "symptoms": ["fever", "dry cough", "fatigue", "loss of taste", "loss of smell"],
+    "riskLevel": "medium",
+    "recommendations": [
+      "Isolate and monitor symptoms",
+      "Consider a rapid test if available",
+      "Seek care if oxygen levels drop"
+    ],
+    "version": 1
+  },
+  {
+    "id": 4,
+    "name": "Allergic Rhinitis",
+    "symptoms": ["sneezing", "itchy eyes", "runny nose", "congestion"],
+    "riskLevel": "low",
+    "recommendations": [
+      "Avoid known allergens",
+      "Consider an antihistamine",
+      "Use a HEPA air filter indoors"
+    ],
+    "version": 1
+  },
+  {
+    "id": 5,
+    "name": "Sinusitis",
+    "symptoms": ["facial pain", "congestion", "headache", "thick nasal discharge"],
+    "riskLevel": "low",
+    "recommendations": [
+      "Use warm compresses for facial pain",
+      "Stay hydrated",
+      "Seek care if symptoms persist over 10 days"
+    ],
+    "version": 1
+  },
+  {
+    "id": 6,
+    "name": "Migraine",
+    "symptoms": ["headache", "nausea", "sensitivity to light", "sensitivity to sound"],
+    "riskLevel": "medium",
+    "recommendations": [
+      "Rest in a dark, quiet room",
+      "Hydrate and avoid known triggers",
+      "Seek care if the headache is sudden or severe"
+    ],
+    "version": 1
+  },
+  {
+    "id": 7,
+    "name": "Tension Headache",
+    "symptoms": ["headache", "neck stiffness", "scalp tenderness"],
+    "riskLevel": "low",
+    "recommendations": [
+      "Practice gentle stretching",
+      "Use warm compresses on neck",
+      "Take breaks from screens"
+    ],
+    "version": 1
+  },
+  {
+    "id": 8,
+    "name": "Gastroenteritis",
+    "symptoms": ["nausea", "vomiting", "diarrhea", "abdominal cramps"],
+    "riskLevel": "medium",
+    "recommendations": [
+      "Sip oral rehydration fluids",
+      "Eat bland foods when tolerated",
+      "Seek care if dehydration occurs"
+    ],
+    "version": 1
+  },
+  {
+    "id": 9,
+    "name": "Food Poisoning",
+    "symptoms": ["nausea", "vomiting", "diarrhea", "fever", "abdominal cramps"],
+    "riskLevel": "medium",
+    "recommendations": [
+      "Rest and hydrate frequently",
+      "Avoid dairy and fatty foods",
+      "Seek care for persistent vomiting"
+    ],
+    "version": 1
+  },
+  {
+    "id": 10,
+    "name": "Urinary Tract Infection",
+    "symptoms": ["burning urination", "frequent urination", "lower abdominal pain"],
+    "riskLevel": "medium",
+    "recommendations": [
+      "Drink extra water",
+      "Avoid bladder irritants like caffeine",
+      "Seek care for fever or back pain"
+    ],
+    "version": 1
+  },
+  {
+    "id": 11,
+    "name": "Strep Throat",
+    "symptoms": ["sore throat", "fever", "swollen lymph nodes", "headache"],
+    "riskLevel": "medium",
+    "recommendations": [
+      "Rest and hydrate",
+      "Avoid sharing utensils",
+      "Seek care for a strep test"
+    ],
+    "version": 1
+  },
+  {
+    "id": 12,
+    "name": "Bronchitis",
+    "symptoms": ["cough", "fatigue", "shortness of breath", "chest discomfort"],
+    "riskLevel": "medium",
+    "recommendations": [
+      "Rest and stay hydrated",
+      "Use a humidifier",
+      "Seek care if breathing worsens"
+    ],
+    "version": 1
+  },
+  {
+    "id": 13,
+    "name": "Asthma Flare",
+    "symptoms": ["shortness of breath", "wheezing", "chest tightness", "cough"],
+    "riskLevel": "high",
+    "recommendations": [
+      "Use prescribed rescue inhaler",
+      "Avoid triggers if possible",
+      "Seek urgent care if symptoms are severe"
+    ],
+    "version": 1
+  },
+  {
+    "id": 14,
+    "name": "Hypertension Spike",
+    "symptoms": ["headache", "blurred vision", "chest discomfort", "dizziness"],
+    "riskLevel": "high",
+    "recommendations": [
+      "Rest and avoid physical exertion",
+      "Check blood pressure if possible",
+      "Seek urgent care for severe symptoms"
+    ],
+    "version": 1
+  },
+  {
+    "id": 15,
+    "name": "Anxiety Episode",
+    "symptoms": ["rapid heartbeat", "shortness of breath", "sweating", "restlessness"],
+    "riskLevel": "low",
+    "recommendations": [
+      "Practice slow breathing exercises",
+      "Reduce caffeine intake",
+      "Reach out to support if needed"
+    ],
+    "version": 1
+  },
+  {
+    "id": 16,
+    "name": "Dehydration",
+    "symptoms": ["thirst", "dry mouth", "fatigue", "dark urine", "dizziness"],
+    "riskLevel": "medium",
+    "recommendations": [
+      "Sip water or oral rehydration solution",
+      "Rest in a cool environment",
+      "Seek care if confusion or fainting occurs"
+    ],
+    "version": 1
+  }
+]

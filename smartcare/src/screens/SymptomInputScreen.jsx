@@ -1,0 +1,169 @@
+﻿import { useEffect, useMemo, useState } from 'react'
+import db from '../db'
+import { scoreSymptoms } from '../agents/symptomScorer'
+import { calculateRisk } from '../agents/riskCalculator'
+
+function SymptomInputScreen({ onResults }) {
+  const [step, setStep] = useState(1)
+  const [symptoms, setSymptoms] = useState([])
+  const [selected, setSelected] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    let isMounted = true
+
+    async function loadSymptoms() {
+      try {
+        setLoading(true)
+        const conditions = await db.conditions.toArray()
+        const unique = new Set()
+        conditions.forEach((condition) => {
+          ;(condition.symptoms || []).forEach((symptom) => unique.add(symptom))
+        })
+        if (isMounted) {
+          setSymptoms(Array.from(unique).sort((a, b) => a.localeCompare(b)))
+          setError('')
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError('Unable to load symptoms offline.')
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false)
+        }
+      }
+    }
+
+    loadSymptoms()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  const selectedSet = useMemo(() => new Set(selected), [selected])
+
+  function toggleSymptom(symptom) {
+    setSelected((prev) =>
+      prev.includes(symptom) ? prev.filter((item) => item !== symptom) : [...prev, symptom],
+    )
+  }
+
+  async function handleCheck() {
+    const matches = await scoreSymptoms(selected)
+    const risk = calculateRisk(matches)
+    onResults({
+      selectedSymptoms: selected,
+      matches,
+      risk,
+    })
+  }
+
+  return (
+    <main className="min-h-screen bg-slate-50 text-slate-900">
+      <div className="mx-auto max-w-4xl px-6 py-10">
+        <header className="mb-8">
+          <p className="text-sm uppercase tracking-[0.2em] text-slate-500">SmartCare</p>
+          <h1 className="mt-3 text-3xl font-semibold">Symptom checker</h1>
+          <p className="mt-2 text-slate-600">
+            Select symptoms that match how you feel. Everything runs locally on your
+            device.
+          </p>
+        </header>
+
+        <div className="mb-6 flex items-center gap-3 text-sm font-medium text-slate-600">
+          <span className={step === 1 ? 'text-slate-900' : 'text-slate-400'}>Step 1</span>
+          <span className="text-slate-300">→</span>
+          <span className={step === 2 ? 'text-slate-900' : 'text-slate-400'}>Step 2</span>
+        </div>
+
+        {loading ? (
+          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <p className="text-sm text-slate-600">Loading symptoms from device...</p>
+          </div>
+        ) : error ? (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-red-700">
+            {error}
+          </div>
+        ) : (
+          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            {step === 1 && (
+              <div>
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+                  {symptoms.map((symptom) => (
+                    <button
+                      key={symptom}
+                      type="button"
+                      onClick={() => toggleSymptom(symptom)}
+                      className={`rounded-lg border px-3 py-2 text-left text-sm transition ${
+                        selectedSet.has(symptom)
+                          ? 'border-emerald-500 bg-emerald-50 text-emerald-900'
+                          : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+                      }`}
+                    >
+                      {symptom}
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-6 flex items-center justify-between">
+                  <p className="text-sm text-slate-600">
+                    Selected: <span className="font-semibold">{selected.length}</span>
+                  </p>
+                  <button
+                    type="button"
+                    disabled={selected.length === 0}
+                    onClick={() => setStep(2)}
+                    className="rounded-full bg-emerald-600 px-5 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
+                  >
+                    Continue
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {step === 2 && (
+              <div>
+                <h2 className="text-lg font-semibold">Review symptoms</h2>
+                {selected.length === 0 ? (
+                  <p className="mt-3 text-sm text-slate-600">No symptoms selected.</p>
+                ) : (
+                  <ul className="mt-3 flex flex-wrap gap-2">
+                    {selected.map((symptom) => (
+                      <li
+                        key={symptom}
+                        className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-700"
+                      >
+                        {symptom}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setStep(1)}
+                    className="rounded-full border border-slate-300 px-5 py-2 text-sm font-semibold text-slate-700"
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="button"
+                    disabled={selected.length === 0}
+                    onClick={handleCheck}
+                    className="rounded-full bg-emerald-600 px-5 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
+                  >
+                    Check now
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </main>
+  )
+}
+
+export default SymptomInputScreen

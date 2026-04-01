@@ -1,10 +1,16 @@
 ﻿import { useEffect, useState } from 'react'
+import { flushQueue } from '../sync/syncManager'
+import { updateKnowledgeBaseIfNeeded } from '../sync/kbUpdater'
 
 export function useOnlineStatus() {
   const [isOnline, setIsOnline] = useState(() => navigator.onLine)
 
   useEffect(() => {
-    const handleOnline = () => setIsOnline(true)
+    const handleOnline = () => {
+      setIsOnline(true)
+      flushQueue()
+      updateKnowledgeBaseIfNeeded()
+    }
     const handleOffline = () => setIsOnline(false)
 
     window.addEventListener('online', handleOnline)
