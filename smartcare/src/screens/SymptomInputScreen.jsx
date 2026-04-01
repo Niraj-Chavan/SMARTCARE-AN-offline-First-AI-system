@@ -1,7 +1,18 @@
-﻿import { useEffect, useMemo, useState } from 'react'
+﻿import { useEffect, useMemo, useRef, useState } from 'react'
 import db from '../db'
 import { scoreSymptoms } from '../agents/symptomScorer'
 import { calculateRisk } from '../agents/riskCalculator'
+
+function normalize(value) {
+  return value.trim().toLowerCase()
+}
+
+function parseTranscript(text) {
+  return text
+    .split(/,|and|then|also|plus|\n/gi)
+    .map((part) => part.trim())
+    .filter(Boolean)
+}
 
 function SymptomInputScreen({ onResults }) {
   const [step, setStep] = useState(1)
@@ -9,6 +20,11 @@ function SymptomInputScreen({ onResults }) {
   const [selected, setSelected] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [search, setSearch] = useState('')
+  const [entry, setEntry] = useState('')
+  const [micStatus, setMicStatus] = useState('idle')
+  const [micError, setMicError] = useState('')
+  const recognitionRef = useRef(null)
 
   useEffect(() => {
     let isMounted = true
@@ -44,11 +60,93 @@ function SymptomInputScreen({ onResults }) {
   }, [])
 
   const selectedSet = useMemo(() => new Set(selected), [selected])
+  const symptomMap = useMemo(() => {
+    const map = new Map()
+    symptoms.forEach((symptom) => map.set(normalize(symptom), symptom))
+    return map
+  }, [symptoms])
+
+  const filteredSymptoms = useMemo(() => {
+    const query = normalize(search)
+    if (!query) return symptoms
+    return symptoms.filter((symptom) => normalize(symptom).includes(query))
+  }, [search, symptoms])
 
   function toggleSymptom(symptom) {
     setSelected((prev) =>
       prev.includes(symptom) ? prev.filter((item) => item !== symptom) : [...prev, symptom],
     )
+  }
+
+  function addByText(text) {
+    const parts = parseTranscript(text)
+    if (parts.length === 0) return
+
+    setSelected((prev) => {
+      const next = new Set(prev)
+      parts.forEach((part) => {
+        const normalized = normalize(part)
+        if (!normalized) return
+
+        if (symptomMap.has(normalized)) {
+          next.add(symptomMap.get(normalized))
+          return
+        }
+
+        const partialMatch = symptoms.find((symptom) =>
+          normalize(symptom).includes(normalized),
+        )
+        if (partialMatch) {
+          next.add(partialMatch)
+        }
+      })
+      return Array.from(next)
+    })
+  }
+
+  function handleAddEntry() {
+    if (!entry.trim()) return
+    addByText(entry)
+    setEntry('')
+  }
+
+  function handleMicClick() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SpeechRecognition) {
+      setMicError('Voice input is not supported in this browser.')
+      return
+    }
+
+    if (micStatus === 'listening' && recognitionRef.current) {
+      recognitionRef.current.stop()
+      return
+    }
+
+    const recognition = new SpeechRecognition()
+    recognition.lang = 'en-US'
+    recognition.interimResults = false
+    recognition.maxAlternatives = 1
+
+    recognition.onstart = () => {
+      setMicStatus('listening')
+      setMicError('')
+    }
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript
+      addByText(transcript)
+    }
+
+    recognition.onerror = (event) => {
+      setMicError(event.error || 'Microphone error')
+    }
+
+    recognition.onend = () => {
+      setMicStatus('idle')
+    }
+
+    recognitionRef.current = recognition
+    recognition.start()
   }
 
   async function handleCheck() {
@@ -91,8 +189,56 @@ function SymptomInputScreen({ onResults }) {
           <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
             {step === 1 && (
               <div>
-                <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-                  {symptoms.map((symptom) => (
+                <div className="flex flex-wrap gap-3">
+                  <div className="flex-1">
+                    <label className="text-xs font-semibold uppercase tracking-[0.15em] text-slate-500">
+                      Search symptoms
+                    </label>
+                    <input
+                      value={search}
+                      onChange={(event) => setSearch(event.target.value)}
+                      placeholder="Type to filter symptoms"
+                      className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-emerald-500 focus:outline-none"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="text-xs font-semibold uppercase tracking-[0.15em] text-slate-500">
+                      Add by text or voice
+                    </label>
+                    <div className="mt-2 flex gap-2">
+                      <input
+                        value={entry}
+                        onChange={(event) => setEntry(event.target.value)}
+                        placeholder="e.g. fever, cough"
+                        className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 focus:border-emerald-500 focus:outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddEntry}
+                        className="rounded-lg border border-slate-200 px-3 text-sm font-semibold text-slate-700 hover:border-slate-300"
+                      >
+                        Add
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleMicClick}
+                        className={`rounded-lg px-3 text-sm font-semibold text-white ${
+                          micStatus === 'listening'
+                            ? 'bg-amber-500'
+                            : 'bg-emerald-600'
+                        }`}
+                      >
+                        {micStatus === 'listening' ? 'Listening...' : 'Mic'}
+                      </button>
+                    </div>
+                    {micError && (
+                      <p className="mt-2 text-xs text-amber-700">{micError}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-3">
+                  {filteredSymptoms.map((symptom) => (
                     <button
                       key={symptom}
                       type="button"

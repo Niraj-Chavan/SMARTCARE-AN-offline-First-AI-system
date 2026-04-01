@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "run:all": "powershell -ExecutionPolicy Bypass -File scripts\\run-all.ps1"
   },
   "dependencies": {
     "dexie": "^4.4.2",
