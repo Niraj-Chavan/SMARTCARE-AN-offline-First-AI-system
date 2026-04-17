@@ -1,16 +1,31 @@
-# React + Vite
+# SmartCare App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This folder contains the SmartCare React PWA.
 
-Currently, two official plugins are available:
+SmartCare is an offline-first symptom-checking app that:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- caches core assets for offline use
+- stores the medical knowledge base in IndexedDB
+- runs symptom scoring locally in the browser
+- saves session history on-device
+- includes a base for reconnect sync and KB updates
 
-## React Compiler
+## Scripts
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+npm install
+npm run dev
+npm test
+npm run build
+npm run e2e
+```
 
-## Expanding the ESLint configuration
+## Main folders
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- `src/screens` contains the app screens
+- `src/agents` contains local scoring and recommendation logic
+- `src/db` contains IndexedDB setup and seeding
+- `src/sync` contains reconnect sync and KB update helpers
+- `public` contains the manifest, icons, and knowledge base JSON
+
+See the repository root [README.md](</home/niraj/Projects /college projects /SE project /SMARTCARE-AN-offline-First-AI-system/README.md:1>) for the full project overview and Ollama integration guidance.
