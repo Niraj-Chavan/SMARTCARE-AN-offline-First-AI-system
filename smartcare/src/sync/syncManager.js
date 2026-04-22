@@ -38,7 +38,7 @@ export async function flushQueue() {
           await db.syncQueue.update(item.id, { synced: 1 })
           syncedCount += 1
         }
-      } catch (error) {
+      } catch {
         // Swallow errors and retry next time we're online.
       }
     }
@@ -48,7 +48,7 @@ export async function flushQueue() {
     }
 
     return { success: true, processed: syncedCount }
-  } catch (error) {
+  } catch {
     return { success: false, processed: 0 }
   }
 }

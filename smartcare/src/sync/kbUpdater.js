@@ -35,7 +35,7 @@ export async function updateKnowledgeBaseIfNeeded() {
     })
 
     return { updated: true, version }
-  } catch (error) {
+  } catch {
     return { updated: false, reason: 'error' }
   }
 }

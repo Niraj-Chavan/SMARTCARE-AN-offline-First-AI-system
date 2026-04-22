@@ -7,12 +7,12 @@
 # Test info
 
 - Name: offline.spec.js >> Offline symptom check >> runs a full check offline without network failures
-- Location: tests\offline.spec.js:6:3
+- Location: tests/offline.spec.js:6:3
 
 # Error details
 
 ```
-Error: browserType.launch: Executable doesn't exist at C:\Users\LENOVO\AppData\Local\ms-playwright\chromium_headless_shell-1217\chrome-headless-shell-win64\chrome-headless-shell.exe
+Error: browserType.launch: Executable doesn't exist at /home/niraj/.cache/ms-playwright/chromium_headless_shell-1217/chrome-headless-shell-linux64/chrome-headless-shell
 ╔════════════════════════════════════════════════════════════╗
 ║ Looks like Playwright was just installed or updated.       ║
 ║ Please run the following command to download new browsers: ║
