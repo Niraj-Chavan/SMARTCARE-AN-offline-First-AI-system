@@ -2,6 +2,7 @@
 import OfflineBanner from './components/OfflineBanner'
 import DebugPanel from './components/DebugPanel'
 import OnboardingScreen from './screens/OnboardingScreen'
+import DashboardScreen from './screens/DashboardScreen'
 import SymptomInputScreen from './screens/SymptomInputScreen'
 import ResultsScreen from './screens/ResultsScreen'
 import HistoryScreen from './screens/HistoryScreen'
@@ -12,7 +13,7 @@ const ONBOARDING_KEY = 'smartcare_onboarded'
 
 function App() {
   const isOnline = useOnlineStatus()
-  const [screen, setScreen] = useState('symptoms')
+  const [screen, setScreen] = useState('dashboard')
   const [results, setResults] = useState(null)
   const [hasOnboarded, setHasOnboarded] = useState(() => {
     return localStorage.getItem(ONBOARDING_KEY) === 'true'
@@ -37,7 +38,7 @@ function App() {
   function handleGetStarted() {
     localStorage.setItem(ONBOARDING_KEY, 'true')
     setHasOnboarded(true)
-    setScreen('symptoms')
+    setScreen('dashboard')
   }
 
   return (
@@ -48,12 +49,23 @@ function App() {
         <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
           <button
             type="button"
-            onClick={() => setScreen('symptoms')}
+            onClick={() => setScreen('dashboard')}
             className="text-base font-semibold text-slate-900"
           >
             SmartCare
           </button>
           <div className="flex items-center gap-3 text-sm font-medium text-slate-600">
+            <button
+              type="button"
+              onClick={() => setScreen('dashboard')}
+              className={
+                screen === 'dashboard'
+                  ? 'text-emerald-600'
+                  : 'hover:text-slate-900'
+              }
+            >
+              Dashboard
+            </button>
             <button
               type="button"
               onClick={() => setScreen('symptoms')}
@@ -81,6 +93,12 @@ function App() {
       </nav>
 
       {!hasOnboarded && <OnboardingScreen onGetStarted={handleGetStarted} />}
+      {hasOnboarded && screen === 'dashboard' && (
+        <DashboardScreen
+          onStartCheck={() => setScreen('symptoms')}
+          onOpenHistory={() => setScreen('history')}
+        />
+      )}
       {hasOnboarded && screen === 'symptoms' && (
         <SymptomInputScreen onResults={handleResults} />
       )}

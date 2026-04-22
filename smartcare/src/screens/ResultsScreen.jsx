@@ -30,16 +30,17 @@ function ResultsScreen({ results, onCheckAgain, onSaved }) {
     )
   }
 
-  const { risk, matches, selectedSymptoms } = results
+  const { risk, matches, selectedSymptoms, aiAssessment } = results
   const topMatches = matches.slice(0, 3)
 
   async function handleSave() {
     if (saving || saved) return
     setSaving(true)
 
-    const [symptomsEncrypted, recommendationEncrypted] = await Promise.all([
+    const [symptomsEncrypted, recommendationEncrypted, aiAssessmentEncrypted] = await Promise.all([
       encryptData(JSON.stringify(selectedSymptoms)),
       encryptData(risk.recommendation || ''),
+      encryptData(JSON.stringify(aiAssessment || null)),
     ])
 
     const entry = {
@@ -47,6 +48,9 @@ function ResultsScreen({ results, onCheckAgain, onSaved }) {
       riskLevel: risk.label,
       symptomsEncrypted,
       recommendationEncrypted,
+      aiAssessmentEncrypted,
+      aiStatus: aiAssessment?.status || 'unavailable',
+      aiModel: aiAssessment?.model || null,
       resultId: topMatches[0]?.id || null,
     }
 
@@ -104,6 +108,59 @@ function ResultsScreen({ results, onCheckAgain, onSaved }) {
         <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h3 className="text-lg font-semibold">Recommendations</h3>
           <p className="mt-3 text-sm text-slate-600">{risk.recommendation}</p>
+        </section>
+
+        <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h3 className="text-lg font-semibold">Ollama review</h3>
+            <span
+              className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                aiAssessment?.status === 'ready'
+                  ? 'bg-emerald-100 text-emerald-800'
+                  : 'bg-amber-100 text-amber-800'
+              }`}
+            >
+              {aiAssessment?.status === 'ready' ? aiAssessment.model : 'Fallback'}
+            </span>
+          </div>
+          <p className="mt-3 text-sm text-slate-700">
+            {aiAssessment?.summary || 'Ollama did not return an offline review.'}
+          </p>
+          {aiAssessment?.error && (
+            <p className="mt-2 text-xs font-medium text-amber-700">{aiAssessment.error}</p>
+          )}
+          {aiAssessment?.nextSteps?.length > 0 && (
+            <div className="mt-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.15em] text-slate-500">
+                Next steps
+              </p>
+              <ul className="mt-2 space-y-2 text-sm text-slate-700">
+                {aiAssessment.nextSteps.map((step) => (
+                  <li key={step} className="rounded-lg bg-slate-50 px-3 py-2">
+                    {step}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {aiAssessment?.redFlags?.length > 0 && (
+            <div className="mt-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.15em] text-red-500">
+                Red flags
+              </p>
+              <ul className="mt-2 space-y-2 text-sm text-red-700">
+                {aiAssessment.redFlags.map((flag) => (
+                  <li key={flag} className="rounded-lg bg-red-50 px-3 py-2">
+                    {flag}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <p className="mt-4 text-xs text-slate-500">
+            {aiAssessment?.disclaimer ||
+              'This is not a diagnosis. Seek professional medical care for urgent symptoms.'}
+          </p>
         </section>
 
         <div className="mt-6 flex flex-wrap gap-3">

@@ -12,33 +12,45 @@ function HistoryScreen() {
   const [sessions, setSessions] = useState([])
   const [loading, setLoading] = useState(true)
 
-  async function loadSessions() {
-    setLoading(true)
-    const data = await db.sessions.orderBy('date').reverse().toArray()
-
-    const hydrated = await Promise.all(
-      data.map(async (session) => {
-        const decryptedSymptoms = session.symptomsEncrypted
-          ? await decryptData(session.symptomsEncrypted)
-          : ''
-        const decryptedRecommendation = session.recommendationEncrypted
-          ? await decryptData(session.recommendationEncrypted)
-          : ''
-
-        return {
-          ...session,
-          symptoms: decryptedSymptoms ? JSON.parse(decryptedSymptoms) : [],
-          recommendation: decryptedRecommendation,
-        }
-      }),
-    )
-
-    setSessions(hydrated)
-    setLoading(false)
-  }
-
   useEffect(() => {
+    let cancelled = false
+
+    async function loadSessions() {
+      setLoading(true)
+      const data = await db.sessions.orderBy('date').reverse().toArray()
+
+      const hydrated = await Promise.all(
+        data.map(async (session) => {
+          const decryptedSymptoms = session.symptomsEncrypted
+            ? await decryptData(session.symptomsEncrypted)
+            : ''
+          const decryptedRecommendation = session.recommendationEncrypted
+            ? await decryptData(session.recommendationEncrypted)
+            : ''
+          const decryptedAiAssessment = session.aiAssessmentEncrypted
+            ? await decryptData(session.aiAssessmentEncrypted)
+            : ''
+
+          return {
+            ...session,
+            symptoms: decryptedSymptoms ? JSON.parse(decryptedSymptoms) : [],
+            recommendation: decryptedRecommendation,
+            aiAssessment: decryptedAiAssessment ? JSON.parse(decryptedAiAssessment) : null,
+          }
+        }),
+      )
+
+      if (!cancelled) {
+        setSessions(hydrated)
+        setLoading(false)
+      }
+    }
+
     loadSessions()
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   async function handleClear() {
@@ -95,6 +107,11 @@ function HistoryScreen() {
                   </p>
                   {session.recommendation && (
                     <p className="mt-2 text-xs text-slate-500">{session.recommendation}</p>
+                  )}
+                  {session.aiAssessment?.summary && (
+                    <p className="mt-2 text-xs text-slate-600">
+                      Ollama: {session.aiAssessment.summary}
+                    </p>
                   )}
                 </article>
               )

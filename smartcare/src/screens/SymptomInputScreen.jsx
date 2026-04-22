@@ -2,6 +2,7 @@
 import db from '../db'
 import { scoreSymptoms } from '../agents/symptomScorer'
 import { calculateRisk } from '../agents/riskCalculator'
+import { generateOllamaAssessment, getOllamaSettings } from '../agents/ollamaClient'
 
 function normalize(value) {
   return value.trim().toLowerCase()
@@ -24,6 +25,8 @@ function SymptomInputScreen({ onResults }) {
   const [entry, setEntry] = useState('')
   const [micStatus, setMicStatus] = useState('idle')
   const [micError, setMicError] = useState('')
+  const [checking, setChecking] = useState(false)
+  const [aiStatus, setAiStatus] = useState('')
   const recognitionRef = useRef(null)
 
   useEffect(() => {
@@ -41,7 +44,7 @@ function SymptomInputScreen({ onResults }) {
           setSymptoms(Array.from(unique).sort((a, b) => a.localeCompare(b)))
           setError('')
         }
-      } catch (err) {
+      } catch {
         if (isMounted) {
           setError('Unable to load symptoms offline.')
         }
@@ -150,13 +153,48 @@ function SymptomInputScreen({ onResults }) {
   }
 
   async function handleCheck() {
-    const matches = await scoreSymptoms(selected)
-    const risk = calculateRisk(matches)
-    onResults({
-      selectedSymptoms: selected,
-      matches,
-      risk,
-    })
+    if (checking) return
+    setChecking(true)
+    setAiStatus('Checking with local rules...')
+
+    try {
+      const matches = await scoreSymptoms(selected)
+      const risk = calculateRisk(matches)
+      let aiAssessment = {
+        status: 'unavailable',
+        model: getOllamaSettings().model,
+        summary: 'Local Ollama review was not available. Rule-based results are shown.',
+        nextSteps: [],
+        redFlags: [],
+        confidence: 'low',
+        disclaimer:
+          'This is not a diagnosis. Seek professional medical care for urgent or worsening symptoms.',
+      }
+
+      try {
+        setAiStatus('Asking Ollama on this device...')
+        aiAssessment = await generateOllamaAssessment({
+          selectedSymptoms: selected,
+          matches,
+          risk,
+        })
+      } catch (error) {
+        aiAssessment.error =
+          error.name === 'AbortError'
+            ? 'Ollama took too long to respond.'
+            : 'Ollama is not reachable or the selected model is not installed.'
+      }
+
+      onResults({
+        selectedSymptoms: selected,
+        matches,
+        risk,
+        aiAssessment,
+      })
+    } finally {
+      setChecking(false)
+      setAiStatus('')
+    }
   }
 
   return (
@@ -296,13 +334,16 @@ function SymptomInputScreen({ onResults }) {
                   </button>
                   <button
                     type="button"
-                    disabled={selected.length === 0}
+                    disabled={selected.length === 0 || checking}
                     onClick={handleCheck}
                     className="rounded-full bg-emerald-600 px-5 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
                   >
-                    Check now
+                    {checking ? 'Checking...' : 'Check now'}
                   </button>
                 </div>
+                {aiStatus && (
+                  <p className="mt-3 text-sm font-medium text-slate-600">{aiStatus}</p>
+                )}
               </div>
             )}
           </div>

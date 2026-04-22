@@ -15,4 +15,11 @@ db.version(2).stores({
   meta: 'key',
 })
 
+db.version(3).stores({
+  conditions: '++id, name, *symptoms, riskLevel, recommendations',
+  sessions: '++id, date, symptoms, result, riskLevel, aiStatus, aiModel',
+  syncQueue: '++id, type, payload, synced, createdAt',
+  meta: 'key',
+})
+
 export default db
